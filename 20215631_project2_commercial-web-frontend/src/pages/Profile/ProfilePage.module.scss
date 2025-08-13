@@ -1,0 +1,48 @@
+.wrapper {
+    padding: 30px 120px;
+    height: 100px;
+    width: 100%;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.main {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px 0;
+}
+
+.row {
+    position: relative;
+    max-width: 50%;
+    height: 42px;
+    display: grid;
+    align-items: center;
+    grid-template-columns: 20% 60% 20%;
+    gap: 12px;
+}
+
+.label {
+    margin-bottom: 0;
+    font-size: 1.4rem;
+}
+
+.input {
+    max-width: 400px;
+    height: 100%;
+}
+
+.avatar {
+    position: absolute;
+    right: 30%;
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}

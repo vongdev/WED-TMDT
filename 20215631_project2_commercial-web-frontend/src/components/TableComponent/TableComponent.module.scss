@@ -1,0 +1,23 @@
+.delete-all-btn {
+    display: flex;
+    align-items: flex-start;
+    justify-content: left;
+    padding: 6px;
+    font-size: 1.6rem;
+    color: red;
+    font-weight: 600;
+    cursor: pointer;
+}
+.export-excel-btn {
+    margin: 16px 0;
+    background-color: transparent;
+    border: none;
+    color: #156d33;
+    font-weight: 600;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.export-excel-btn:hover p {
+    text-decoration: underline;
+}

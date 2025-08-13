@@ -1,0 +1,19 @@
+.wrapper {
+    padding: 20px 120px;
+    background-color: #fff;
+}
+
+.path {
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.path-home {
+    cursor: pointer;
+
+    &:hover {
+        color: red;
+    }
+}

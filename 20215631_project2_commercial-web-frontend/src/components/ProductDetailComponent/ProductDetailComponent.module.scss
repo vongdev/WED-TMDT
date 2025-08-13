@@ -1,0 +1,81 @@
+.wrapper {
+    display: flex;
+    gap: 30px;
+    padding: 16px;
+    background-color: #fff;
+}
+
+.wrapper-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.small-image {
+    display: grid;
+    place-items: center;
+}
+
+.name {
+    font-size: 3.2rem;
+}
+
+.rating-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.star-icon {
+    color: #ffde59;
+}
+
+.price {
+    font-size: 2.8rem;
+    font-weight: 500;
+    margin: 20px 0;
+}
+
+.quantity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.quantity-label {
+    font-size: 1.4rem;
+}
+
+.quantity-action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.description,
+.address {
+    h4 {
+        margin: 0;
+        font-size: 1.4rem;
+    }
+
+    p {
+        font-size: 1.4rem;
+        text-align: justify;
+        line-height: 1.8rem;
+    }
+
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.buy-button {
+    margin-top: 120px;
+    &:hover {
+        opacity: 0.75;
+    }
+}

@@ -1,0 +1,78 @@
+.card-wrapper {
+    position: relative;
+    border-radius: 10px;
+}
+
+.card-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    max-width: 150px;
+
+}
+
+.card-image {
+    object-fit: contain;
+    height: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    padding: 10px;
+}
+
+.card-rating_sold {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.star-icon {
+    color: #ffde59;
+}
+
+.number-sold {
+    padding: 0 8px;
+    border-left: 1px solid #ccc;
+}
+
+.card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 8px;
+    color: rgb(255, 68, 76);
+}
+
+.price {
+    font-weight: 600;
+    font-size: 1.6rem;
+}
+
+.discount {
+    font-weight: 400;
+    font-size: 1.3rem;
+    color: rgb(39, 39, 42);
+    background: rgb(245, 245, 250);
+    padding: 2px 4px;
+}
+
+.out-of-stock {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba($color: #000000, $alpha: 0.45);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 2rem;
+    cursor: not-allowed;
+}
