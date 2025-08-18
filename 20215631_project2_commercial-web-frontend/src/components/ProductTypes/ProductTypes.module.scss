@@ -1,8 +1,96 @@
 .wrapper {
-    padding: 6px 8px;
-    background-color: rgb(48, 152, 236);
-    border-radius: 6px;
+    padding: 8px 14px;
+    background: linear-gradient(90deg, #3a7bd5, #00d2ff);
+    border-radius: 20px;
     color: #fff;
     font-weight: 600;
+    font-size: 0.95rem;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(58, 123, 213, 0.3);
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+    border: none;
+    
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(58, 123, 213, 0.4);
+    }
+    
+    &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(58, 123, 213, 0.4);
+    }
+    
+    &.outline {
+        background: transparent;
+        border: 1.5px solid #3a7bd5;
+        color: #3a7bd5;
+        box-shadow: none;
+        
+        &:hover {
+            background-color: rgba(58, 123, 213, 0.08);
+        }
+    }
+    
+    &.small {
+        padding: 4px 10px;
+        font-size: 0.85rem;
+    }
+    
+    &.large {
+        padding: 10px 20px;
+        font-size: 1.1rem;
+    }
+    
+    /* Thêm các biến thể màu sắc */
+    &.primary {
+        background: linear-gradient(90deg, #3a7bd5, #00d2ff);
+    }
+    
+    &.success {
+        background: linear-gradient(90deg, #28a745, #20c997);
+    }
+    
+    &.danger {
+        background: linear-gradient(90deg, #dc3545, #ff6b6b);
+    }
+    
+    &.warning {
+        background: linear-gradient(90deg, #ffc107, #ffda85);
+        color: #333;
+    }
+    
+    /* Hiệu ứng gợn sóng khi click */
+    &:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1) translate(-50%, -50%);
+        transform-origin: 50% 50%;
+    }
+    
+    &:focus:not(:active)::after {
+        animation: ripple 0.5s ease-out;
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0) translate(-50%, -50%);
+            opacity: 0.5;
+        }
+        100% {
+            transform: scale(20) translate(-50%, -50%);
+            opacity: 0;
+        }
+    }
 }

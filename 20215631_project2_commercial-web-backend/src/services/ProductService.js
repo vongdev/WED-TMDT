@@ -151,10 +151,7 @@ const getAllProduct = async (limit, page, sort, filter) => {
   }
 };
 
-module.exports = {
-  // ...giữ nguyên các export khác nếu có
-  getAllProduct,
-};
+
 
 const getDetailProduct = (id) => {
     return new Promise(async (resolve, reject) => {

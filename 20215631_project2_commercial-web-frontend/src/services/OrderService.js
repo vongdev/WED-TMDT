@@ -1,56 +1,138 @@
-import axios from 'axios';
 import { axiosJWT } from './UserService';
 
-const API = process.env.REACT_APP_API_URL; // ví dụ http://localhost:3001
+// Hàm helper để lấy token hợp lệ
+const getValidToken = (access_token) => {
+  // Đảm bảo token là string
+  return typeof access_token === 'string' && access_token
+    ? access_token 
+    : localStorage.getItem('access_token');
+};
 
-// helper cấu hình auth
-const auth = (access_token) => ({
-  headers: { Authorization: `Bearer ${access_token}` }, // hoặc 'token' nếu bạn muốn giữ header cũ
-  withCredentials: true, // nếu bạn dùng cookie refresh
-});
+// Helper cấu hình auth
+const auth = (access_token) => {
+  const token = getValidToken(access_token);
+  return {
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    withCredentials: true,
+  };
+};
 
-// Tạo đơn (user đã đăng nhập)
-export const createOrder = async (data, access_token) => {
-  const res = await axiosJWT.post(`${API}/api/order/create`, data, auth(access_token));
-  return res.data;
+// Thêm debug log
+const logRequest = (action, userId, token) => {
+  console.log(`${action} for userId: ${userId}`);
+  console.log(`Token available: ${token ? 'Yes' : 'No'}`);
+  if (token) console.log(`Token type: ${typeof token}`);
 };
 
 // Lấy đơn theo userId (user hoặc admin)
 export const getOrderByUserId = async (userId, access_token) => {
-  const res = await axiosJWT.get(`${API}/api/order/get-detail/${userId}`, auth(access_token));
-  return res.data;
+  try {
+    const token = getValidToken(access_token);
+    logRequest('Fetching orders', userId, token);
+    
+    if (!token) {
+      console.error('No valid token available');
+      throw new Error('Không có token hợp lệ. Vui lòng đăng nhập lại');
+    }
+    
+    const res = await axiosJWT.get(`/order/get-detail/${userId}`, auth(token));
+    console.log('Orders fetched successfully:', res.data);
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching orders:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Tạo đơn (user đã đăng nhập)
+export const createOrder = async (data, access_token) => {
+  try {
+    const token = getValidToken(access_token);
+    const res = await axiosJWT.post(`/order/create`, data, auth(token));
+    return res.data;
+  } catch (error) {
+    console.error('Create order error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // Hủy đơn theo orderId (owner hoặc admin)
-// FE chỉ cần gửi "reason"; server sẽ tự hoàn kho dựa trên orderItems trong DB.
 export const cancelOrder = async (orderId, access_token, reason = 'changed_mind') => {
-  const res = await axiosJWT.delete(`${API}/api/order/${orderId}`, {
-    ...auth(access_token),
-    data: { reason },          // axios.delete: body phải đặt trong 'data'
-  });
-  return res.data;
+  try {
+    const token = getValidToken(access_token);
+    
+    // Sử dụng route POST thay vì DELETE để có thể gửi reason trong body
+    const res = await axiosJWT.post(`/order/cancel/${orderId}`, 
+      { reason }, 
+      auth(token)
+    );
+    
+    return res.data;
+  } catch (error) {
+    console.error('Cancel order error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Kiểm tra xem đơn hàng có thể hủy không
+export const canCancelOrder = async (orderId, access_token) => {
+  try {
+    const token = getValidToken(access_token);
+    const res = await axiosJWT.get(`/order/can-cancel/${orderId}`, auth(token));
+    return res.data;
+  } catch (error) {
+    console.error('Check can cancel order error:', error.response?.data || error.message);
+    return { status: 'ERR', canCancel: false, message: error.response?.data?.message || 'Có lỗi xảy ra' };
+  }
 };
 
 // Admin cập nhật trạng thái đơn
 export const updateOrder = async (id, access_token, data) => {
-  const res = await axiosJWT.put(`${API}/api/order/${id}`, data, auth(access_token));
-  return res.data;
+  try {
+    const token = getValidToken(access_token);
+    const res = await axiosJWT.put(`/order/update-status/${id}`, data, auth(token));
+    return res.data;
+  } catch (error) {
+    console.error('Update order error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // Admin: lấy tất cả đơn
 export const getAllOrders = async (access_token) => {
-  const res = await axiosJWT.get(`${API}/api/order/getAll`, auth(access_token));
-  return res.data;
+  try {
+    const token = getValidToken(access_token);
+    const res = await axiosJWT.get(`/order/getAll`, auth(token));
+    return res.data;
+  } catch (error) {
+    console.error('Get all orders error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // Admin: xoá nhiều đơn
 export const deleteManyOrder = async (data, access_token) => {
-  const res = await axiosJWT.post(`${API}/api/order/delete-many`, data, auth(access_token));
-  return res.data;
+  try {
+    const token = getValidToken(access_token);
+    const res = await axiosJWT.post(`/order/delete-many`, data, auth(token));
+    return res.data;
+  } catch (error) {
+    console.error('Delete many orders error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 // Admin: doanh thu
 export const getRevenue = async (access_token) => {
-  const res = await axiosJWT.get(`${API}/api/order/revenue`, auth(access_token));
-  return res.data;
+  try {
+    const token = getValidToken(access_token);
+    const res = await axiosJWT.get(`/order/revenue`, auth(token));
+    return res.data;
+  } catch (error) {
+    console.error('Get revenue error:', error.response?.data || error.message);
+    throw error;
+  }
 };

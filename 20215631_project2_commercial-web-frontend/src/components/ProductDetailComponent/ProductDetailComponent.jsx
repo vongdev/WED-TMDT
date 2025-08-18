@@ -19,7 +19,8 @@ const cx = classNames.bind(styles);
 const resolveImg = (img) => {
   if (!img) return '/no-product-found.jpg';
   if (/^https?:\/\//i.test(img)) return img;           // URL đầy đủ
-  return img.startsWith('/') ? img : `/${img}`;        // tương đối -> tuyệt đối (FE 3000)
+  if (/^data:image\//i.test(img)) return img;          // base64/dataURL
+  return img.startsWith('/') ? img : `/${img}`;        // tương đối -> tuyệt đối
 };
 
 const ProductDetailComponent = ({ id }) => {

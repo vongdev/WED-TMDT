@@ -9,7 +9,7 @@ import * as message from '../../components/Message/Message';
 
 import ModalComponent from '../../components/ModalComponent/ModalComponent.jsx';
 import InputComponent from '../../components/InputComponent/InputComponent.jsx';
-import { AddForm } from '../../components/AdminProduct/style.js';
+// Đã xóa import AddForm để sửa warning 1
 import { useMutationHook } from '../../hooks/useMutationHook.js';
 import Loading from '../../components/LoadingComponent/Loading.jsx';
 import { updateUser } from '../../redux/slices/userSlice.js';
@@ -33,7 +33,6 @@ const PaymentPage = () => {
         {
             title: 'Thanh toán',
             description: 'Thanh toán',
-            // subTitle: 'Left 00:00:08',
         },
         {
             title: 'Đặt hàng',
@@ -49,7 +48,8 @@ const PaymentPage = () => {
         city: '',
     });
     const [deliveryMethodValue, setDeliveryMethodValue] = useState('fast');
-    const [paymentMethodValue, setPaymentMethodValue] = useState('cod');
+    const [paymentMethodValue, setPaymentMethodValue] = useState('COD');
+    
 
     const [form] = Form.useForm();
 
@@ -65,22 +65,46 @@ const PaymentPage = () => {
         return res;
     });
 
-    const { data: dataAddOrder, isLoading: isLoadingAddOrder, isSuccess, isError } = mutationAddOrder;
+    // Đã xóa isLoadingAddOrder để sửa warning 2
+    const { data: dataAddOrder, isSuccess, isError } = mutationAddOrder;
+
+    // Chuyển các useMemo lên trước để sửa warning 3
+    const priceMemo = useMemo(() => {
+        const result = order?.selectedOrderItems?.reduce((total, cur) => {
+            return total + (cur.price - (cur.price * cur.discount) / 100) * cur.amount;
+        }, 0);
+        return result || 0;
+    }, [order]);
+
+    const deliveryMemo = useMemo(() => {
+        if (!priceMemo || priceMemo === 0) return 0;
+        if (priceMemo > 100000) {
+            return 30000;
+        } else {
+            return 15000;
+        }
+    }, [priceMemo]);
+
+    const totalPriceMemo = useMemo(() => {
+        return (priceMemo || 0) + (deliveryMemo || 0);
+    }, [priceMemo, deliveryMemo]);
 
     useEffect(() => {
         if (isOpenModalUpdateInfo) {
             setStateUserDetail({
-                city: user?.city,
-                name: user?.name,
-                address: user?.address,
-                phone: user?.phone,
+                city: user?.city || '',
+                name: user?.name || '',
+                address: user?.address || '',
+                phone: user?.phone || '',
             });
         }
-    }, [isOpenModalUpdateInfo]);
+    }, [isOpenModalUpdateInfo, user]);
 
     useEffect(() => {
-        form.setFieldsValue(stateUserDetail);
-    }, [form, stateUserDetail]);
+        if (isOpenModalUpdateInfo) {
+            form.setFieldsValue(stateUserDetail);
+        }
+    }, [form, stateUserDetail, isOpenModalUpdateInfo]);
 
     useEffect(() => {
         if (isSuccess && dataAddOrder?.status === 'OK') {
@@ -100,36 +124,9 @@ const PaymentPage = () => {
                 },
             });
         } else if (isError) {
-            message.error();
+            message.error('Đặt hàng thất bại');
         }
-    }, [isSuccess, isError]);
-
-    const handleAddOrder = () => {
-        if (
-            user?.access_token &&
-            order?.selectedOrderItems &&
-            user?.name &&
-            user?.address &&
-            user?.phone &&
-            user?.city &&
-            priceMemo &&
-            user?.id
-        ) {
-            mutationAddOrder.mutate({
-                access_token: user?.access_token,
-                orderItems: order?.selectedOrderItems,
-                fullName: user?.name,
-                address: user?.address,
-                phone: user?.phone,
-                city: user?.city,
-                paymentMethod: paymentMethodValue,
-                itemsPrice: priceMemo,
-                shippingPrice: deliveryMemo,
-                totalPrice: totalPriceMemo,
-                user: user.id,
-            });
-        }
-    };
+    }, [isSuccess, isError, dataAddOrder, dispatch, navigate, order, deliveryMethodValue, paymentMethodValue, totalPriceMemo]);
 
     const handleCancelUpdate = () => {
         setStateUserDetail({
@@ -140,6 +137,137 @@ const PaymentPage = () => {
         });
         form.resetFields();
         setIsOpenModalUpdateInfo(false);
+    };
+
+    const handleAddOrder = async () => {
+        // Kiểm tra dữ liệu đầu vào
+        if (!user?.access_token) {
+            message.error('Bạn cần đăng nhập để đặt hàng');
+            return;
+        }
+        
+        if (!order?.selectedOrderItems?.length) {
+            message.error('Giỏ hàng trống, vui lòng thêm sản phẩm');
+            return;
+        }
+        
+        if (!user?.name || !user?.address || !user?.phone || !user?.city) {
+            message.error('Vui lòng cung cấp đầy đủ thông tin giao hàng');
+            return;
+        }
+
+        try {
+            console.log('Bắt đầu quá trình đặt hàng...');
+            
+            // Chuẩn bị dữ liệu đơn hàng
+            const orderData = {
+                orderItems: order?.selectedOrderItems,
+                fullName: user?.name,
+                address: user?.address,
+                phone: user?.phone,
+                city: user?.city,
+                paymentMethod: paymentMethodValue || 'COD',
+                itemsPrice: priceMemo || 0,
+                shippingPrice: deliveryMemo || 0,
+                totalPrice: totalPriceMemo || 0,
+                user: user.id
+            };
+
+            console.log('Dữ liệu đơn hàng:', JSON.stringify(orderData, null, 2));
+            
+            // Tạo fetch request
+            console.log('Gửi request đến API...');
+            
+            // Thử API thủ công trước để kiểm tra kết nối
+            try {
+                console.log('Kiểm tra kết nối API...');
+                // Sửa warning 4 bằng cách sử dụng kết quả
+                await fetch('http://localhost:3001/api', { 
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                console.log('Kết nối API OK');
+            } catch (pingError) {
+                console.error('Không thể kết nối đến server:', pingError);
+                message.error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+                return;
+            }
+            
+            // Gọi API chính
+            const response = await fetch('http://localhost:3001/api/order/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.access_token}`
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            console.log('Nhận response:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Lỗi HTTP: ${response.status} - ${errorText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Kết quả từ API:', data);
+            
+            // Xử lý kết quả
+            if (data.status === 'OK') {
+                message.success('Đặt hàng thành công');
+                
+                // Xóa sản phẩm đã đặt khỏi giỏ hàng
+                const orderIds = [];
+                order?.selectedOrderItems?.forEach((item) => {
+                    orderIds.push(item.product);
+                });
+                dispatch(removeAllOrdersProduct({ listChecked: orderIds }));
+                
+                // Chuyển đến trang đặt hàng thành công
+                navigate('/order-success', {
+                    state: {
+                        deliveryMethodValue,
+                        paymentMethodValue,
+                        orders: order?.selectedOrderItems,
+                        totalPrice: totalPriceMemo,
+                    }
+                });
+            } else {
+                message.error(typeof data.message === 'string' ? data.message : 'Đặt hàng thất bại');
+            }
+        } catch (error) {
+            console.error("Chi tiết lỗi khi đặt hàng:", error);
+            message.error('Có lỗi xảy ra khi đặt hàng: ' + error.message);
+            
+            // Thử sử dụng Axios hoặc XMLHttpRequest
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:3001/api/order/create', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Authorization', `Bearer ${user?.access_token}`);
+                xhr.onload = function() {
+                    console.log('XHR response:', xhr.status, xhr.responseText);
+                };
+                xhr.onerror = function() {
+                    console.error('XHR error');
+                };
+                xhr.send(JSON.stringify({
+                    orderItems: order?.selectedOrderItems,
+                    fullName: user?.name,
+                    address: user?.address,
+                    phone: user?.phone,
+                    city: user?.city,
+                    paymentMethod: paymentMethodValue || 'COD',
+                    itemsPrice: priceMemo || 0,
+                    shippingPrice: deliveryMemo || 0,
+                    totalPrice: totalPriceMemo || 0,
+                    user: user.id
+                }));
+            } catch (xhrError) {
+                console.error('XHR cũng lỗi:', xhrError);
+            }
+        }
     };
 
     const handleUpdateInfoUser = () => {
@@ -168,26 +296,6 @@ const PaymentPage = () => {
     const handleChangePaymentMethod = (e) => {
         setPaymentMethodValue(e.target.value);
     };
-
-    const priceMemo = useMemo(() => {
-        const result = order?.selectedOrderItems?.reduce((total, cur) => {
-            return total + (cur.price - (cur.price * cur.discount) / 100) * cur.amount;
-        }, 0);
-        return result;
-    }, [order]);
-
-    const deliveryMemo = useMemo(() => {
-        if (priceMemo === 0) return 0;
-        if (priceMemo > 100000) {
-            return 30000;
-        } else {
-            return 15000;
-        }
-    }, [priceMemo]);
-
-    const totalPriceMemo = useMemo(() => {
-        return priceMemo + deliveryMemo;
-    }, [priceMemo, deliveryMemo]);
 
     const handleOnChangeDetail = (e) => {
         setStateUserDetail({
@@ -236,8 +344,8 @@ const PaymentPage = () => {
                                     onChange={handleChangePaymentMethod}
                                     value={paymentMethodValue}
                                 >
-                                    <Radio value={'cod'}>Thanh toán khi nhận hàng</Radio>
-                                    <Radio value={'transfer'}>Thanh toán bằng tài khoản ngân hàng</Radio>
+                                    <Radio value={'COD'}>Thanh toán khi nhận hàng</Radio>
+                                    <Radio value={'VNPAY'}>Thanh toán bằng VNPAY</Radio>
                                 </Radio.Group>
                             </div>
                         </div>
@@ -248,7 +356,7 @@ const PaymentPage = () => {
                             <div className={cx('right-row')}>
                                 <div className={cx('address')}>
                                     <p>Giao đến:</p>
-                                    <span>{user?.address}</span>
+                                    <span>{user?.address || 'Chưa có địa chỉ'}</span>
                                 </div>
                                 <span className={cx('change-address')} onClick={handleChangeAddress}>
                                     Thay đổi
@@ -257,20 +365,20 @@ const PaymentPage = () => {
                         </div>
                         <div className={cx('right-row')}>
                             <p>Tạm tính</p>
-                            <span>{priceMemo.toLocaleString('vn-VN') + ' đ'}</span>
+                            <span>{(priceMemo || 0).toLocaleString('vn-VN') + ' đ'}</span>
                         </div>
                         <div className={cx('right-row')}>
                             <p>Phí vận chuyển</p>
-                            <span>{deliveryMemo.toLocaleString('vn-VN') + ' đ'}</span>
+                            <span>{(deliveryMemo || 0).toLocaleString('vn-VN') + ' đ'}</span>
                         </div>
 
                         <div className={cx('total-price')}>
                             <p>Tổng tiền</p>
-                            <span>{totalPriceMemo.toLocaleString('vn-VN') + ' đ'}</span>
+                            <span>{(totalPriceMemo || 0).toLocaleString('vn-VN') + ' đ'}</span>
                         </div>
 
                         <div className={cx('buy-button')}>
-                            <button onClick={() => handleAddOrder()}>Đặt hàng</button>
+                            <button onClick={handleAddOrder}>Đặt hàng</button>
                         </div>
                     </div>
                 </div>
@@ -282,33 +390,19 @@ const PaymentPage = () => {
                     onOk={handleUpdateInfoUser}
                 >
                     <Loading isLoading={mutationUpdate.isPending}>
-                        <AddForm
+                        <Form
                             name="basic"
-                            labelCol={{
-                                span: 6,
-                            }}
-                            wrapperCol={{
-                                span: 18,
-                            }}
-                            style={{
-                                maxWidth: 600,
-                            }}
-                            initialValues={{
-                                remember: true,
-                            }}
-                            // onFinish={onUpdateUser}
+                            labelCol={{ span: 6 }}
+                            wrapperCol={{ span: 18 }}
+                            style={{ maxWidth: 600 }}
+                            initialValues={{ remember: true }}
                             autoComplete="on"
                             form={form}
                         >
                             <Form.Item
                                 label="Tên khách hàng"
                                 name="name"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Vui lòng nhập tên khách hàng!',
-                                    },
-                                ]}
+                                rules={[{ required: true, message: 'Vui lòng nhập tên khách hàng!' }]}
                             >
                                 <InputComponent
                                     value={stateUserDetail.name}
@@ -320,12 +414,7 @@ const PaymentPage = () => {
                             <Form.Item
                                 label="City"
                                 name="city"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Vui lòng nhập thành phố!',
-                                    },
-                                ]}
+                                rules={[{ required: true, message: 'Vui lòng nhập thành phố!' }]}
                             >
                                 <InputComponent
                                     value={stateUserDetail.city}
@@ -337,12 +426,7 @@ const PaymentPage = () => {
                             <Form.Item
                                 label="Số điện thoại"
                                 name="phone"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Vui lòng nhập số điện thoại!',
-                                    },
-                                ]}
+                                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}
                             >
                                 <InputComponent
                                     value={stateUserDetail.phone}
@@ -354,12 +438,7 @@ const PaymentPage = () => {
                             <Form.Item
                                 label="Địa chỉ"
                                 name="address"
-                                rules={[
-                                    {
-                                        required: true,
-                                        // message: 'Vui lòng nhập giá sản phẩm!',
-                                    },
-                                ]}
+                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
                             >
                                 <InputComponent
                                     value={stateUserDetail.address}
@@ -367,7 +446,7 @@ const PaymentPage = () => {
                                     name="address"
                                 />
                             </Form.Item>
-                        </AddForm>
+                        </Form>
                     </Loading>
                 </ModalComponent>
             </Loading>

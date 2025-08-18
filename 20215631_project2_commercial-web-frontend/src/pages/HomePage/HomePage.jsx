@@ -28,35 +28,38 @@ const HomePage = () => {
     const sliderArr = [images.slider1, images.slider2, images.slider3];
 
     const fetchProductAll = async (context) => {
-        try {
-            const limit = context?.queryKey && context.queryKey[1];
-            const search = context?.queryKey && context.queryKey[2];
-
-            if (typeof limit !== 'number' || limit <= 0) {
-                console.error('Invalid limit value:', limit);
-                return [];
-            }
-
-            const res = await ProductService.getAllProduct(search, limit);
-
-            if (res && res.data) {
-                if (search?.length > 0 || refSearch.current) {
-                    setTotal(res.total);
-                    setPage(res.totalPage);
-                    setStateProducts(res.data);
-                    return [];
-                } else {
-                    return res;
-                }
-            } else {
-                console.error('Invalid response from ProductService.getAllProduct:', res);
-                return [];
-            }
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            throw error;
+    try {
+        const limit = context?.queryKey && context.queryKey[1];
+        const search = context?.queryKey && context.queryKey[2];
+        
+        // Thiết lập giá trị mặc định cho limit nếu nó không phải là số hợp lệ
+        const validLimit = (typeof limit === 'number' && limit > 0) ? limit : 10; // Sử dụng 10 làm giá trị mặc định
+        
+        // Không còn hiển thị lỗi, chỉ dùng giá trị mặc định
+        if (typeof limit !== 'number' || limit <= 0) {
+            console.log('Using default limit value:', validLimit);
         }
-    };
+
+        const res = await ProductService.getAllProduct(search, validLimit);
+
+        if (res && res.data) {
+            if (search?.length > 0 || refSearch.current) {
+                setTotal(res.total);
+                setPage(res.totalPage);
+                setStateProducts(res.data);
+                return [];
+            } else {
+                return res;
+            }
+        } else {
+            console.error('Invalid response from ProductService.getAllProduct:', res);
+            return [];
+        }
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+    }
+};
 
     const fetchAllTypeProduct = async () => {
         const res = await ProductService.getAllTypeProduct();

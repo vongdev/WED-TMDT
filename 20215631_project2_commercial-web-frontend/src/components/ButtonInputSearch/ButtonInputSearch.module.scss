@@ -1,17 +1,30 @@
 .wrapper {
     display: flex;
     background-color: #fff;
-
+    border-radius: 25px;
+    overflow: hidden; // Đảm bảo không có phần tử con nào vượt quá border-radius
+    border: 2px solid rgb(124, 161, 229);
 }
 
 .input {
-    border-radius: 0;
+    border-radius: 25px 0 0 25px;
+    border: none;
+    padding: 8px 16px;
+    flex: 1;
+    outline: none;
 }
 
 .button {
     border: none;
-    border-radius: 0;
+    border-radius: 0 25px 25px 0;
     background-color: rgb(13, 92, 182);
     font-weight: 500;
     color: #fff;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    
+    &:hover {
+        background-color: rgb(11, 78, 154);
+    }
 }

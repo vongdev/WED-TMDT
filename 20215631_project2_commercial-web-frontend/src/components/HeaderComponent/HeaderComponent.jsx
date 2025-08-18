@@ -1,7 +1,7 @@
 import { Badge, Col, Popover, Row } from 'antd';
 import className from 'classnames/bind';
 import styles from './HeaderComponent.module.scss';
-import { UserOutlined, CaretDownOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { UserOutlined, ShoppingCartOutlined } from '@ant-design/icons'; // Đã xóa CaretDownOutlined
 import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,7 +21,7 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
 
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('');
+    const [searchValue, setSearchValue] = useState(''); // Đổi tên biến để tránh cảnh báo
     const [isOpenPopup, setIsOpenPopup] = useState(false);
 
     const handleNavigateLogin = () => {
@@ -44,12 +44,8 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
         } else if (type === 'admin') {
             navigate('/system/admin');
         } else if (type === 'orders') {
-            navigate('/user-orders', {
-                state: {
-                    id: user?.id,
-                    token: user?.access_token,
-                },
-            });
+            // Chỉ cần navigate, không cần truyền token qua state
+            navigate('/user-orders');
         }
 
         setIsOpenPopup(false);
@@ -80,15 +76,16 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
     );
 
     const onChangeSearchInput = (e) => {
-        setSearch(e.target.value);
-        dispatch(searchProduct(e.target.value));
+        const value = e.target.value;
+        setSearchValue(value); // Sử dụng biến đã đổi tên
+        dispatch(searchProduct(value));
     };
 
     return (
         <div>
             <Row className={cx('wrapper')}>
                 <Col className={cx('logo')} span={3} onClick={() => navigate('/')}>
-                    LOGO
+                   KING SHOP 
                 </Col>
                 {!isHiddenSearch && (
                     <Col span={12}>
@@ -97,6 +94,7 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
                             placeholder="Tìm kiếm sản phẩm..."
                             textButton="Tìm kiếm"
                             onChange={onChangeSearchInput}
+                            value={searchValue} // Thêm giá trị để tận dụng biến
                         />
                     </Col>
                 )}
@@ -116,7 +114,7 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
                                 </Popover>
                             ) : (
                                 <div className={cx('text-wrapper')} onClick={handleNavigateLogin}>
-                                    <span>Đăng nhập / Đăng ký</span>
+                                    <span>Tài Khoản</span>
                                 </div>
                             )}
                         </div>

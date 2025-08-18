@@ -27,9 +27,16 @@ const ProfilePage = () => {
         avatar: '',
     });
 
+    // FIX: Sửa thứ tự tham số trong API call
     const mutationUpdate = useMutationHook((data) => {
         const { id, access_token, ...rest } = data;
-        return UserService.updateUser(id, rest, access_token);
+        console.log('Updating with token:', access_token ? 'present' : 'missing');
+        // Đảm bảo token là string
+        const tokenValue = typeof access_token === 'string' 
+            ? access_token 
+            : localStorage.getItem('access_token');
+        
+        return UserService.updateUser(id, tokenValue, rest);
     });
 
     const dispatch = useDispatch();
@@ -45,9 +52,22 @@ const ProfilePage = () => {
     }, [user]);
 
     const handleGetDetailUser = async (id, token) => {
-        const res = await UserService.getDetailUser(id, token);
-        dispatch(updateUser({ ...res?.data, access_token: token }));
-        return res;
+        try {
+            // Đảm bảo token là string
+            const tokenValue = typeof token === 'string' 
+                ? token 
+                : localStorage.getItem('access_token');
+            
+            console.log('Getting user details with token:', tokenValue ? 'present' : 'missing');
+            
+            const res = await UserService.getDetailUser(id, tokenValue);
+            dispatch(updateUser({ ...res?.data, access_token: tokenValue }));
+            return res;
+        } catch (error) {
+            console.error('Error getting user details:', error);
+            message.error('Không thể lấy thông tin người dùng');
+            throw error;
+        }
     };
 
     const handleOnChange = (e) => {
@@ -69,20 +89,35 @@ const ProfilePage = () => {
     });
 
     const handleUpdate = () => {
+        // Đảm bảo token
+        const tokenValue = typeof user?.access_token === 'string'
+            ? user?.access_token
+            : localStorage.getItem('access_token');
+            
+        if (!tokenValue) {
+            return message.error('Vui lòng đăng nhập lại để cập nhật thông tin');
+        }
+        
         mutationUpdate.mutate(
-            { id: user?.id, ...userInfo, access_token: user?.access_token },
+            { 
+                id: user?.id, 
+                ...userInfo, 
+                access_token: tokenValue
+            },
             {
                 onSuccess: () => {
                     queryUser.refetch();
                     message.success('Cập nhật thành công');
                 },
-                onError: () => {
-                    message.error('Cập nhật thất bại');
+                onError: (error) => {
+                    console.error('Update error:', error);
+                    message.error('Cập nhật thất bại. Vui lòng đăng nhập lại.');
                 },
             },
         );
     };
 
+    // JSX phần còn lại giữ nguyên
     return (
         <div className={cx('wrapper')}>
             <h1 className={cx('title')}>Thông tin người dùng</h1>
