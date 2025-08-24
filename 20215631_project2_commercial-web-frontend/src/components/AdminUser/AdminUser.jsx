@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux';
 import { useMutationHook } from '../../hooks/useMutationHook';
 import * as UserService from '../../services/UserService';
 import { UploadOutlined, DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
-import { AddForm, CenteredRow } from '../AdminProduct/style';
+import { CenteredRow } from '../AdminProduct/style';
 
 const cx = classNames.bind(styles);
 
@@ -136,12 +136,9 @@ const AdminUser = () => {
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
-        // setSearchText(selectedKeys[0]);
-        // setSearchedColumn(dataIndex);
     };
     const handleReset = (clearFilters) => {
         clearFilters();
-        // setSearchText('');
     };
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -199,20 +196,6 @@ const AdminUser = () => {
                 setTimeout(() => searchInput.current?.select(), 100);
             }
         },
-        // render: (text) =>
-        //     searchedColumn === dataIndex ? (
-        //         <Highlighter
-        //             highlightStyle={{
-        //                 backgroundColor: '#ffc069',
-        //                 padding: 0,
-        //             }}
-        //             searchWords={[searchText]}
-        //             autoEscape
-        //             textToHighlight={text ? text.toString() : ''}
-        //         />
-        //     ) : (
-        //         text
-        //     ),
     });
 
     const columns = [
@@ -339,7 +322,7 @@ const AdminUser = () => {
 
     const handleDeleteUser = () => {
         mutationDelete.mutate(
-            { id: rowSelected, token: user?.access_token },
+            { id: rowSelected, access_token: user?.access_token },
             {
                 onSettled: () => {
                     queryUser.refetch();
@@ -350,7 +333,7 @@ const AdminUser = () => {
 
     const handleDeleteManyUser = (_ids) => {
         mutationDeleteMany.mutate(
-            { ids: _ids, token: user?.access_token },
+            { ids: _ids, access_token: user?.access_token },
             {
                 onSettled: () => {
                     queryUser.refetch();
@@ -404,7 +387,7 @@ const AdminUser = () => {
                 width="90%"
             >
                 <Loading isLoading={isPendingUpdate}>
-                    <AddForm
+                    <Form
                         name="basic"
                         labelCol={{
                             span: 6,
@@ -448,7 +431,7 @@ const AdminUser = () => {
                                 Xác nhận
                             </Button>
                         </Form.Item>
-                    </AddForm>
+                    </Form>
                 </Loading>
             </DrawerComponent>
 

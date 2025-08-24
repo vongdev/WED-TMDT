@@ -5,7 +5,7 @@ import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import TableComponent from '../TableComponent/TableComponent';
 import { useEffect, useRef, useState } from 'react';
 import InputComponent from '../InputComponent/InputComponent';
-import { AddForm, CenteredRow } from './style';
+import { CenteredRow } from './style';
 import { getBase64, renderOptions } from '../../utils';
 import { useMutationHook } from '../../hooks/useMutationHook';
 import * as ProductService from '../../services/ProductService';
@@ -46,6 +46,7 @@ const AdminProduct = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const [form] = Form.useForm();
+    const [formDetail] = Form.useForm();
 
     const mutation = useMutationHook((data) => {
         const { name, price, description, rating, image, type, countInStock, discount } = data;
@@ -138,6 +139,16 @@ const AdminProduct = () => {
                     countInStock: res?.data?.countInStock,
                     discount: res?.data?.discount,
                 });
+                formDetail.setFieldsValue({
+                    name: res?.data?.name,
+                    price: res?.data?.price,
+                    description: res?.data?.description,
+                    rating: res?.data?.rating,
+                    image: res?.data?.image,
+                    type: res?.data?.type,
+                    countInStock: res?.data?.countInStock,
+                    discount: res?.data?.discount,
+                });
             }
             setIsPendingUpdate(false);
         }
@@ -174,12 +185,9 @@ const AdminProduct = () => {
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
-        // setSearchText(selectedKeys[0]);
-        // setSearchedColumn(dataIndex);
     };
     const handleReset = (clearFilters) => {
         clearFilters();
-        // setSearchText('');
     };
     const getColumnSearchProps = (dataIndex) => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -237,20 +245,6 @@ const AdminProduct = () => {
                 setTimeout(() => searchInput.current?.select(), 100);
             }
         },
-        // render: (text) =>
-        //     searchedColumn === dataIndex ? (
-        //         <Highlighter
-        //             highlightStyle={{
-        //                 backgroundColor: '#ffc069',
-        //                 padding: 0,
-        //             }}
-        //             searchWords={[searchText]}
-        //             autoEscape
-        //             textToHighlight={text ? text.toString() : ''}
-        //         />
-        //     ) : (
-        //         text
-        //     ),
     });
 
     const columns = [
@@ -319,9 +313,9 @@ const AdminProduct = () => {
             filterSearch: true,
             onFilter: (value, record) => {
                 if (value === 'opt1') return record.rating >= 4;
-                else if (value === 'opt2') return record.price >= 3 && record.price < 4;
-                else if (value === 'opt3') return record.price >= 2 && record.price < 3;
-                else return record.price < 2;
+                else if (value === 'opt2') return record.rating >= 3 && record.rating < 4;
+                else if (value === 'opt3') return record.rating >= 2 && record.rating < 3;
+                else return record.rating < 2;
             },
             ellipsis: true
         },
@@ -376,7 +370,7 @@ const AdminProduct = () => {
         if (isSuccessDeleted && dataDeleted?.status === 'OK') {
             message.success();
             handleDeleteCancel();
-        } else if (isError) {
+        } else if (isErrorDeleted) {
             message.error();
         }
     }, [isSuccessDeleted, isErrorDeleted]);
@@ -400,7 +394,7 @@ const AdminProduct = () => {
 
     const handleDeleteProduct = () => {
         mutationDelete.mutate(
-            { id: rowSelected, token: user?.access_token },
+            { id: rowSelected, access_token: user?.access_token },
             {
                 onSettled: () => {
                     queryProduct.refetch();
@@ -411,7 +405,7 @@ const AdminProduct = () => {
 
     const handleDeleteManyProduct = (_ids) => {
         mutationDeleteMany.mutate(
-            { ids: _ids, token: user?.access_token },
+            { ids: _ids, access_token: user?.access_token },
             {
                 onSettled: () => {
                     queryProduct.refetch();
@@ -426,31 +420,14 @@ const AdminProduct = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStateProduct({
-            name: '',
-            price: '',
-            description: '',
-            rating: '',
-            image: '',
-            type: '',
-            countInStock: '',
-            discount: '',
-        });
+        setStateProduct(initialProduct());
         form.resetFields();
     };
 
     const handleCloseDrawer = () => {
         setIsOpenDrawer(false);
-        setStateProductDetail({
-            name: '',
-            price: '',
-            description: '',
-            rating: '',
-            image: '',
-            type: '',
-            countInStock: '',
-        });
-        form.resetFields();
+        setStateProductDetail(initialProduct());
+        formDetail.resetFields();
     };
 
     const onFinish = () => {
@@ -494,7 +471,6 @@ const AdminProduct = () => {
     };
 
     const handleOnChangeAvatar = async (fileInfo) => {
-        // const file = fileList[0];
         const file = fileInfo.file;
         if (!file.url && !file.preview) {
             file.preview = await getBase64(file.originFileObj);
@@ -506,7 +482,6 @@ const AdminProduct = () => {
     };
 
     const handleOnChangeAvatarDetail = async (fileInfo) => {
-        // const file = fileList[0];
         const file = fileInfo.file;
         if (!file.url && !file.preview) {
             file.preview = await getBase64(file.originFileObj);
@@ -555,7 +530,7 @@ const AdminProduct = () => {
 
             <ModalComponent forceRender title="Tạo sản phẩm" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isPending}>
-                    <AddForm
+                    <Form
                         name="basic"
                         labelCol={{
                             span: 8,
@@ -575,7 +550,7 @@ const AdminProduct = () => {
                     >
                         <Form.Item
                             label="Tên sản phẩm"
-                            name="Name"
+                            name="name"
                             rules={[
                                 {
                                     required: true,
@@ -601,9 +576,6 @@ const AdminProduct = () => {
                                 onChange={handleOnChangeSelectType}
                                 options={renderOptions(typeProduct?.data?.data)}
                             />
-                            {/* {typeSelect === 'add_type' && (
-                                <InputComponent value={stateProduct.type} onChange={handleOnChange} name="type" />
-                            )} */}
                         </Form.Item>
 
                         {stateProduct.type === 'add_type' && (
@@ -694,14 +666,17 @@ const AdminProduct = () => {
                             />
                         </Form.Item>
 
-                        <CenteredRow label="Hình ảnh" name="image">
+                        <Form.Item
+                            label="Hình ảnh"
+                            name="image"
+                        >
                             <Upload onChange={handleOnChangeAvatar} showUploadList={false}>
                                 <Button icon={<UploadOutlined />}>Chọn file</Button>
                             </Upload>
                             {stateProduct.image && (
                                 <img src={stateProduct.image} alt="avatar" className={cx('avatar')} />
                             )}
-                        </CenteredRow>
+                        </Form.Item>
 
                         <Form.Item
                             wrapperCol={{
@@ -713,7 +688,7 @@ const AdminProduct = () => {
                                 Xác nhận
                             </Button>
                         </Form.Item>
-                    </AddForm>
+                    </Form>
                 </Loading>
             </ModalComponent>
 
@@ -724,8 +699,8 @@ const AdminProduct = () => {
                 width="90%"
             >
                 <Loading isLoading={isPendingUpdate}>
-                    <AddForm
-                        name="basic"
+                    <Form
+                        name="detail"
                         labelCol={{
                             span: 6,
                         }}
@@ -738,9 +713,8 @@ const AdminProduct = () => {
                         initialValues={{
                             remember: true,
                         }}
-                        // onFinish={onUpdateProduct}
                         autoComplete="off"
-                        form={form}
+                        form={formDetail}
                     >
                         <Form.Item
                             label="Tên sản phẩm"
@@ -861,7 +835,7 @@ const AdminProduct = () => {
                             />
                         </Form.Item>
 
-                        <CenteredRow
+                        <Form.Item
                             label="Hình ảnh"
                             name="image"
                             rules={[
@@ -876,7 +850,7 @@ const AdminProduct = () => {
                             {stateProductDetail?.image && (
                                 <img src={stateProductDetail?.image} alt="avatar" className={cx('avatar')} />
                             )}
-                        </CenteredRow>
+                        </Form.Item>
 
                         <Form.Item
                             wrapperCol={{
@@ -893,7 +867,7 @@ const AdminProduct = () => {
                                 Xác nhận
                             </Button>
                         </Form.Item>
-                    </AddForm>
+                    </Form>
                 </Loading>
             </DrawerComponent>
 

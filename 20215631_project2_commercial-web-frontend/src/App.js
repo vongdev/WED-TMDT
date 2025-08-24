@@ -10,6 +10,7 @@ import { updateUser } from './redux/slices/userSlice';
 import Loading from './components/LoadingComponent/Loading';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { connectSocket, disconnectSocket, joinAdminRoom, joinUserRoom, listenToNotifications } from './socket';
 
 function App() {
@@ -68,6 +69,7 @@ function App() {
             disconnectSocket();
         };
     }, [user?.isLoggedIn, user?.isAdmin, user?.id]);
+    
 
     useEffect(() => {
         const restoreUserSession = async () => {
@@ -162,6 +164,7 @@ function App() {
                 draggable
                 pauseOnHover
             />
+            {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
         </div>
     );
 }
