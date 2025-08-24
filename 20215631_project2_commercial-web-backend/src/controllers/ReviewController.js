@@ -39,3 +39,27 @@ exports.getReviewsByProduct = async (req, res) => {
     res.status(500).json({ status: 'ERR', message: error.message });
   }
 };
+
+// Thêm API xóa review - chỉ chính chủ được xóa
+exports.deleteReview = async (req, res) => {
+  try {
+    const reviewId = req.params.id;
+    const userId = req.user?.id;
+    const review = await Review.findById(reviewId);
+    if (!review) return res.status(404).json({ status: 'ERR', message: 'Review not found' });
+    if (String(review.user) !== String(userId)) {
+      return res.status(403).json({ status: 'ERR', message: 'Bạn không có quyền xóa đánh giá này' });
+    }
+    await review.deleteOne();
+    // Cập nhật lại rating trung bình cho sản phẩm
+    const reviews = await Review.find({ product: review.product });
+    const avgRating = reviews.length ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length) : 0;
+    await Product.findByIdAndUpdate(review.product, {
+      rating: avgRating,
+      numReviews: reviews.length,
+    });
+    return res.json({ status: 'OK', message: 'Đã xóa đánh giá' });
+  } catch (e) {
+    return res.status(500).json({ status: 'ERR', message: e.message });
+  }
+};

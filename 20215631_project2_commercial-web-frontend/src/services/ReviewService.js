@@ -1,4 +1,3 @@
-// src/services/ReviewService.js
 import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -9,6 +8,13 @@ export const getReviewsByProduct = async (productId) => {
 
 export const createOrUpdateReview = async (data, token) => {
     const res = await axios.post(`${API_URL}/review`, data, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return res.data;
+};
+
+export const deleteReview = async (reviewId, token) => {
+    const res = await axios.delete(`${API_URL}/review/${reviewId}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     return res.data;

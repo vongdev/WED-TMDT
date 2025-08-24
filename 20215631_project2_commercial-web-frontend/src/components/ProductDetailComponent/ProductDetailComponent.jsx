@@ -2,7 +2,7 @@ import { Col, Image, Rate, Select, Tag, Modal, Input, Button, List } from 'antd'
 import classNames from 'classnames/bind';
 import styles from './ProductDetailComponent.module.scss';
 import { WrapperInputNumber } from './style.js';
-import { PlusOutlined, MinusOutlined } from '@ant-design/icons';
+import { PlusOutlined, MinusOutlined, DeleteOutlined } from '@ant-design/icons';
 import ButtonComponent from '../ButtonComponent/ButtonComponent';
 import * as ProductService from '../../services/ProductService';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +14,8 @@ import { addOrderProduct } from '../../redux/slices/orderSlice.js';
 import * as message from '../Message/Message';
 import * as UserService from '../../services/UserService';
 import { updateUser } from '../../redux/slices/userSlice.js';
+// Thêm ReviewService để gọi API xóa review
+import * as ReviewService from '../../services/ReviewService';
 
 const cx = classNames.bind(styles);
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -132,6 +134,21 @@ const ProductDetailComponent = ({ id }) => {
       message.error('Bạn cần đăng nhập và đã mua hàng để đánh giá!');
     }
     setReviewLoading(false);
+  };
+
+  // ==== Xóa đánh giá ====
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await ReviewService.deleteReview(reviewId, user?.access_token);
+      message.success('Đã xóa đánh giá');
+      // reload reviews
+      const data = await getReviewsByProduct(id);
+      setReviews(data);
+      setUserRate(0);
+      setUserComment('');
+    } catch (e) {
+      message.error('Xóa đánh giá thất bại');
+    }
   };
 
   // ==== Kiểm tra user đã đánh giá chưa để hiển thị lại rate/comment ====
@@ -395,7 +412,23 @@ const ProductDetailComponent = ({ id }) => {
               dataSource={reviews}
               locale={{ emptyText: "Chưa có đánh giá nào" }}
               renderItem={item => (
-                <List.Item>
+                <List.Item
+                  actions={
+                    user?.id === item?.user?._id
+                      ? [
+                          <Button
+                            key="delete"
+                            type="link"
+                            icon={<DeleteOutlined />}
+                            danger
+                            onClick={() => handleDeleteReview(item._id)}
+                          >
+                            Xóa
+                          </Button>
+                        ]
+                      : []
+                  }
+                >
                   <b>{item?.user?.name || 'Khách'}:</b>
                   <Rate value={item.rating} disabled style={{ marginLeft: 8 }} />
                   <span style={{ marginLeft: 8 }}>{item.comment}</span>
