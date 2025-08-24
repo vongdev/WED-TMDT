@@ -5,7 +5,7 @@ import ProductTypes from '../../components/ProductTypes/ProductTypes';
 import SliderComponent from '../../components/SliderComponent/SliderComponent';
 import images from '../../assets/images';
 import CardComponent from '../../components/CartComponent/CartComponent';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import * as ProductService from '../../services/ProductService';
 import { useSelector } from 'react-redux';
 import { useEffect, useRef, useState } from 'react';
@@ -17,119 +17,73 @@ const cx = classNames.bind(styles);
 
 const HomePage = () => {
     const searchProductValue = useSelector((state) => state.product?.search);
-    const searchDebounce = useDebounce(searchProductValue, 1000);
-    const refSearch = useRef();
-    const [stateProducts, setStateProducts] = useState([]);
-    const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-    const [total, setTotal] = useState(0);
-    const [page, setPage] = useState(0);
+    const searchDebounce = useDebounce(searchProductValue, 500); // debounce 500ms cho nhanh hơn
     const [productLimit, setProductLimit] = useState(5);
     const [productTypes, setProductTypes] = useState([]);
     const sliderArr = [images.slider1, images.slider2, images.slider3];
 
-    const fetchProductAll = async (context) => {
-    try {
-        const limit = context?.queryKey && context.queryKey[1];
-        const search = context?.queryKey && context.queryKey[2];
-        
-        // Thiết lập giá trị mặc định cho limit nếu nó không phải là số hợp lệ
-        const validLimit = (typeof limit === 'number' && limit > 0) ? limit : 10; // Sử dụng 10 làm giá trị mặc định
-        
-        // Không còn hiển thị lỗi, chỉ dùng giá trị mặc định
-        if (typeof limit !== 'number' || limit <= 0) {
-            console.log('Using default limit value:', validLimit);
-        }
-
-        const res = await ProductService.getAllProduct(search, validLimit);
-
-        if (res && res.data) {
-            if (search?.length > 0 || refSearch.current) {
-                setTotal(res.total);
-                setPage(res.totalPage);
-                setStateProducts(res.data);
-                return [];
-            } else {
-                return res;
-            }
-        } else {
-            console.error('Invalid response from ProductService.getAllProduct:', res);
-            return [];
-        }
-    } catch (error) {
-        console.error('Error fetching products:', error);
-        throw error;
-    }
-};
-
-    const fetchAllTypeProduct = async () => {
-        const res = await ProductService.getAllTypeProduct();
-        if (res?.status === 'OK') {
-            setProductTypes(res?.data);
-        }
-    };
-
-    const { isPending, data: products } = useQuery({
-        queryKey: ['products', productLimit, searchDebounce],
-        queryFn: fetchProductAll,
-        option: { retry: 3, retryDelay: 1000, keepPreviousData: true },
-    });
-
+    // Lấy danh sách loại sản phẩm
     useEffect(() => {
+        const fetchAllTypeProduct = async () => {
+            const res = await ProductService.getAllTypeProduct();
+            if (res?.status === 'OK') {
+                setProductTypes(res?.data);
+            }
+        };
         fetchAllTypeProduct();
     }, []);
 
-    useEffect(() => {
-        if (products?.data?.length > 0) {
-            setTotal(products?.total);
-            setStateProducts(products.data);
-        }
-    }, [products]);
+    // Fetch sản phẩm sử dụng react-query, tự động refetch khi searchDebounce hoặc productLimit thay đổi
+    const { isPending, data: productsData } = useQuery({
+        queryKey: ['products', productLimit, searchDebounce],
+        queryFn: async () => {
+            const res = await ProductService.getAllProduct(searchDebounce, productLimit);
+            return res;
+        },
+        keepPreviousData: true,
+        retry: 3,
+        retryDelay: 1000,
+    });
 
-    useEffect(() => {
-        if (refSearch.current) {
-            setIsLoadingProducts(true);
-            fetchProductAll(searchDebounce);
-        }
-        refSearch.current = true;
-        setIsLoadingProducts(false);
-    }, [searchDebounce]);
+    // Lấy data sản phẩm, tổng, page từ kết quả query
+    const products = productsData?.data || [];
+    const total = productsData?.total || 0;
+    const page = productsData?.totalPage || 1;
 
     return (
         <div className={cx('wrapper')}>
             <div className={cx('nav')}>
-                {productTypes.map((item, index) => {
-                    return <ProductTypes name={item} key={index} />;
-                })}
+                {productTypes.map((item, index) => (
+                    <ProductTypes name={item} key={index} />
+                ))}
             </div>
             <div className={cx('slider-wrapper')}>
                 <SliderComponent arrImage={sliderArr} />
             </div>
-            <Loading isLoading={isPending || isLoadingProducts}>
+            <Loading isLoading={isPending}>
                 <div className={cx('product-cart-wrapper')}>
-                    {stateProducts?.map((product) => {
-                        return (
-                            <CardComponent
-                                key={product._id}
-                                id={product._id}
-                                countInStock={product.countInStock}
-                                description={product.description}
-                                image={product.image}
-                                name={product.name}
-                                price={product.price}
-                                rating={product.rating}
-                                type={product.type}
-                                numberSold={product.numberSold}
-                                discount={product.discount}
-                            />
-                        );
-                    })}
-                    {stateProducts.length === 0 && <img className={cx("no-product-found")} alt="" src={images.noProductFound} />}
+                    {products.map((product) => (
+                        <CardComponent
+                            key={product._id}
+                            id={product._id}
+                            countInStock={product.countInStock}
+                            description={product.description}
+                            image={product.image}
+                            name={product.name}
+                            price={product.price}
+                            rating={product.rating}
+                            type={product.type}
+                            numberSold={product.numberSold}
+                            discount={product.discount}
+                        />
+                    ))}
+                    {products.length === 0 && <img className={cx("no-product-found")} alt="" src={images.noProductFound} />}
                 </div>
             </Loading>
 
             <div className={cx('load-more-btn-wrapper')}>
                 <ButtonComponent
-                    disabled={total === stateProducts.length || page === 1 || stateProducts.length === 0}
+                    disabled={total === products.length || page === 1 || products.length === 0}
                     className={cx('load-more-products-btn')}
                     styleButton={{
                         display: 'flex',

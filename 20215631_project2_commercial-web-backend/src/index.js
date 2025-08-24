@@ -28,13 +28,11 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('Người dùng đã kết nối:', socket.id);
 
-  // Xử lý khi admin tham gia room
   socket.on('join-admin-room', () => {
     socket.join('admin-room');
     console.log('Admin đã tham gia room');
   });
 
-  // Xử lý khi người dùng tham gia room
   socket.on('join-user-room', (userId) => {
     socket.join(`user-${userId}`);
     console.log(`Người dùng ${userId} đã tham gia room`);
@@ -73,6 +71,10 @@ app.use((req, res, next) => {
 
 // ====== Routes ======
 routes(app);
+
+// ====== Thêm ReviewRouter cho chức năng đánh giá sản phẩm ======
+const ReviewRouter = require('./routes/ReviewRouter');
+app.use('/api/review', ReviewRouter);
 
 // ====== MongoDB Connect ======
 mongoose.connect(process.env.MONGO_DB, {

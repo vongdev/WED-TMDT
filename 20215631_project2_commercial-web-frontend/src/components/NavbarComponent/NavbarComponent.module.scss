@@ -1,11 +1,21 @@
+:root {
+    --primary-color: #3a7bd5;
+    --primary-gradient: linear-gradient(90deg, #3a7bd5, #00d2ff);
+    --primary-gradient-hover: linear-gradient(90deg, #2990e2, #01b8d7);
+    --danger-color: #ff424e;
+    --shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+    --border-radius: 10px;
+    --transition: all 0.22s;
+}
+
 .wrapper {
     width: 20%;
     display: flex;
     flex-direction: column;
     background: linear-gradient(to bottom, #ffffff, #f7f9fa);
     border-right: 1px solid #eaeaea;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
-    border-radius: 0 10px 10px 0;
+    box-shadow: var(--shadow);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
     overflow: hidden;
     padding: 15px 0;
 }
@@ -16,7 +26,7 @@
 }
 
 .label {
-    color: #3a7bd5;
+    color: var(--primary-color);
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 12px;
@@ -31,7 +41,7 @@
         left: 0;
         width: 40px;
         height: 2px;
-        background: linear-gradient(90deg, #3a7bd5, #00d2ff);
+        background: var(--primary-gradient);
     }
 }
 
@@ -48,7 +58,7 @@
     font-weight: 400;
     padding: 10px 15px;
     border-radius: 6px;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     margin-bottom: 3px;
     display: flex;
     align-items: center;
@@ -56,16 +66,16 @@
     &:before {
         content: '•';
         margin-right: 8px;
-        color: #3a7bd5;
+        color: var(--primary-color);
         opacity: 0;
         transform: scale(0);
-        transition: all 0.2s ease;
+        transition: var(--transition);
     }
 
     &:hover {
         cursor: pointer;
         background-color: rgba(58, 123, 213, 0.08);
-        color: #3a7bd5;
+        color: var(--primary-color);
         transform: translateX(3px);
         
         &:before {
@@ -76,7 +86,7 @@
     
     &.active {
         background-color: rgba(58, 123, 213, 0.12);
-        color: #3a7bd5;
+        color: var(--primary-color);
         font-weight: 500;
         
         &:before {
@@ -97,7 +107,7 @@
         align-items: center;
         gap: 8px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: var(--transition);
         padding: 6px 10px;
         border-radius: 4px;
         
@@ -113,12 +123,12 @@
             border: 2px solid #ccc;
             border-radius: 3px;
             outline: none;
-            transition: all 0.2s ease;
+            transition: var(--transition);
             position: relative;
             
             &:checked {
-                background-color: #3a7bd5;
-                border-color: #3a7bd5;
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
                 
                 &:after {
                     content: '';
@@ -134,7 +144,7 @@
             }
             
             &:hover {
-                border-color: #3a7bd5;
+                border-color: var(--primary-color);
             }
         }
     }
@@ -147,7 +157,7 @@
     padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     
     &:hover {
         background-color: rgba(58, 123, 213, 0.05);
@@ -179,16 +189,35 @@
     font-size: 1.1rem;
     color: #444;
     cursor: pointer;
-    transition: all 0.3s ease;
-    
+    transition: var(--transition);
+
     &:hover {
         background: linear-gradient(90deg, rgba(58, 123, 213, 0.2), rgba(0, 210, 255, 0.2));
         transform: translateY(-2px);
     }
     
     &.active {
-        background: linear-gradient(90deg, #3a7bd5, #00d2ff);
+        background: var(--primary-gradient);
         color: white;
         font-weight: 500;
     }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .wrapper {
+        width: 30%;
+        padding: 10px 0;
+    }
+    .label { font-size: 1.15rem; }
+}
+
+@media (max-width: 600px) {
+    .wrapper {
+        width: 100%;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        padding: 6px 0;
+    }
+    .label { font-size: 1rem; }
+    .list-item { font-size: 0.98rem; padding: 7px 10px; }
 }

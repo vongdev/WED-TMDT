@@ -25,6 +25,10 @@ const CardComponent = (props) => {
             cover={<img className={cx('card-image')} alt="example" src={image} />}
             onClick={() => handleDetailProduct(id, countInStock)}
         >
+            <div className={cx('rating')}>
+                    <span>{typeof rating === 'number' ? rating.toFixed(1) : 0}</span>
+                    <StarFilled className={cx('star-icon')} />
+                </div>
             <p className={cx('card-name')}>{name}</p>
             <div className={cx('card-rating_sold')}>
                 <div className={cx('rating')}>

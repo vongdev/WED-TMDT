@@ -9,11 +9,10 @@ import * as message from '../../components/Message/Message';
 
 import ModalComponent from '../../components/ModalComponent/ModalComponent.jsx';
 import InputComponent from '../../components/InputComponent/InputComponent.jsx';
-// Đã xóa import AddForm để sửa warning 1
 import { useMutationHook } from '../../hooks/useMutationHook.js';
 import Loading from '../../components/LoadingComponent/Loading.jsx';
 import { updateUser } from '../../redux/slices/userSlice.js';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { removeAllOrdersProduct } from '../../redux/slices/orderSlice.js';
 import ProcessBar from '../../components/ProcessBar/ProcessBar.jsx';
 
@@ -24,20 +23,17 @@ const PaymentPage = () => {
     const user = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // --- Lấy buyNow từ location.state nếu có ---
+    const buyNowItems = location?.state?.buyNow;
+    // Nếu có buyNow thì ưu tiên hiển thị, nếu không thì lấy từ giỏ hàng
+    const itemsToPay = buyNowItems || order?.selectedOrderItems;
 
     const processBarItems = [
-        {
-            title: 'Giỏ hàng',
-            description: 'Giỏ hàng',
-        },
-        {
-            title: 'Thanh toán',
-            description: 'Thanh toán',
-        },
-        {
-            title: 'Đặt hàng',
-            description: 'Đặt hàng',
-        },
+        { title: 'Giỏ hàng', description: 'Giỏ hàng' },
+        { title: 'Thanh toán', description: 'Thanh toán' },
+        { title: 'Đặt hàng', description: 'Đặt hàng' },
     ];
 
     const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false);
@@ -49,7 +45,6 @@ const PaymentPage = () => {
     });
     const [deliveryMethodValue, setDeliveryMethodValue] = useState('fast');
     const [paymentMethodValue, setPaymentMethodValue] = useState('COD');
-    
 
     const [form] = Form.useForm();
 
@@ -65,16 +60,15 @@ const PaymentPage = () => {
         return res;
     });
 
-    // Đã xóa isLoadingAddOrder để sửa warning 2
     const { data: dataAddOrder, isSuccess, isError } = mutationAddOrder;
 
-    // Chuyển các useMemo lên trước để sửa warning 3
+    // --- Tính giá ---
     const priceMemo = useMemo(() => {
-        const result = order?.selectedOrderItems?.reduce((total, cur) => {
+        const result = itemsToPay?.reduce((total, cur) => {
             return total + (cur.price - (cur.price * cur.discount) / 100) * cur.amount;
         }, 0);
         return result || 0;
-    }, [order]);
+    }, [itemsToPay]);
 
     const deliveryMemo = useMemo(() => {
         if (!priceMemo || priceMemo === 0) return 0;
@@ -108,25 +102,27 @@ const PaymentPage = () => {
 
     useEffect(() => {
         if (isSuccess && dataAddOrder?.status === 'OK') {
-            const orderIds = [];
-            order?.selectedOrderItems?.forEach((item) => {
-                orderIds.push(item.product);
-            });
-            dispatch(removeAllOrdersProduct({ listChecked: orderIds }));
+            // Nếu là mua ngay thì không cần xóa giỏ hàng
+            if (!buyNowItems) {
+                const orderIds = [];
+                itemsToPay?.forEach((item) => {
+                    orderIds.push(item.product);
+                });
+                dispatch(removeAllOrdersProduct({ listChecked: orderIds }));
+            }
             message.success('Đặt hàng thành công');
-
             navigate('/order-success', {
                 state: {
                     deliveryMethodValue,
                     paymentMethodValue,
-                    orders: order?.selectedOrderItems,
+                    orders: itemsToPay,
                     totalPrice: totalPriceMemo,
                 },
             });
         } else if (isError) {
             message.error('Đặt hàng thất bại');
         }
-    }, [isSuccess, isError, dataAddOrder, dispatch, navigate, order, deliveryMethodValue, paymentMethodValue, totalPriceMemo]);
+    }, [isSuccess, isError, dataAddOrder, dispatch, navigate, itemsToPay, deliveryMethodValue, paymentMethodValue, totalPriceMemo, buyNowItems]);
 
     const handleCancelUpdate = () => {
         setStateUserDetail({
@@ -145,23 +141,20 @@ const PaymentPage = () => {
             message.error('Bạn cần đăng nhập để đặt hàng');
             return;
         }
-        
-        if (!order?.selectedOrderItems?.length) {
+
+        if (!itemsToPay?.length) {
             message.error('Giỏ hàng trống, vui lòng thêm sản phẩm');
             return;
         }
-        
+
         if (!user?.name || !user?.address || !user?.phone || !user?.city) {
             message.error('Vui lòng cung cấp đầy đủ thông tin giao hàng');
             return;
         }
 
         try {
-            console.log('Bắt đầu quá trình đặt hàng...');
-            
-            // Chuẩn bị dữ liệu đơn hàng
             const orderData = {
-                orderItems: order?.selectedOrderItems,
+                orderItems: itemsToPay,
                 fullName: user?.name,
                 address: user?.address,
                 phone: user?.phone,
@@ -173,100 +166,13 @@ const PaymentPage = () => {
                 user: user.id
             };
 
-            console.log('Dữ liệu đơn hàng:', JSON.stringify(orderData, null, 2));
-            
-            // Tạo fetch request
-            console.log('Gửi request đến API...');
-            
-            // Thử API thủ công trước để kiểm tra kết nối
-            try {
-                console.log('Kiểm tra kết nối API...');
-                // Sửa warning 4 bằng cách sử dụng kết quả
-                await fetch('http://localhost:3001/api', { 
-                    method: 'HEAD',
-                    mode: 'no-cors'
-                });
-                console.log('Kết nối API OK');
-            } catch (pingError) {
-                console.error('Không thể kết nối đến server:', pingError);
-                message.error('Không thể kết nối đến server. Vui lòng thử lại sau.');
-                return;
-            }
-            
-            // Gọi API chính
-            const response = await fetch('http://localhost:3001/api/order/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${user?.access_token}`
-                },
-                body: JSON.stringify(orderData)
+            // Gọi API tạo đơn hàng
+            mutationAddOrder.mutate({
+                ...orderData,
+                access_token: user?.access_token
             });
-            
-            console.log('Nhận response:', response.status, response.statusText);
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Lỗi HTTP: ${response.status} - ${errorText}`);
-            }
-            
-            const data = await response.json();
-            console.log('Kết quả từ API:', data);
-            
-            // Xử lý kết quả
-            if (data.status === 'OK') {
-                message.success('Đặt hàng thành công');
-                
-                // Xóa sản phẩm đã đặt khỏi giỏ hàng
-                const orderIds = [];
-                order?.selectedOrderItems?.forEach((item) => {
-                    orderIds.push(item.product);
-                });
-                dispatch(removeAllOrdersProduct({ listChecked: orderIds }));
-                
-                // Chuyển đến trang đặt hàng thành công
-                navigate('/order-success', {
-                    state: {
-                        deliveryMethodValue,
-                        paymentMethodValue,
-                        orders: order?.selectedOrderItems,
-                        totalPrice: totalPriceMemo,
-                    }
-                });
-            } else {
-                message.error(typeof data.message === 'string' ? data.message : 'Đặt hàng thất bại');
-            }
         } catch (error) {
-            console.error("Chi tiết lỗi khi đặt hàng:", error);
             message.error('Có lỗi xảy ra khi đặt hàng: ' + error.message);
-            
-            // Thử sử dụng Axios hoặc XMLHttpRequest
-            try {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', 'http://localhost:3001/api/order/create', true);
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.setRequestHeader('Authorization', `Bearer ${user?.access_token}`);
-                xhr.onload = function() {
-                    console.log('XHR response:', xhr.status, xhr.responseText);
-                };
-                xhr.onerror = function() {
-                    console.error('XHR error');
-                };
-                xhr.send(JSON.stringify({
-                    orderItems: order?.selectedOrderItems,
-                    fullName: user?.name,
-                    address: user?.address,
-                    phone: user?.phone,
-                    city: user?.city,
-                    paymentMethod: paymentMethodValue || 'COD',
-                    itemsPrice: priceMemo || 0,
-                    shippingPrice: deliveryMemo || 0,
-                    totalPrice: totalPriceMemo || 0,
-                    user: user.id
-                }));
-            } catch (xhrError) {
-                console.error('XHR cũng lỗi:', xhrError);
-            }
         }
     };
 

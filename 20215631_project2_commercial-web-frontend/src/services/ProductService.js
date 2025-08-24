@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { axiosJWT } from './UserService';
+import { axiosJWT, authHeader } from './UserService'; // import thêm authHeader nếu có
 
 export const getAllProduct = async (search, limit) => {
     let res = {};
@@ -22,30 +22,30 @@ export const getDetailProduct = async (id) => {
     return res.data;
 };
 
+// ==== SỬA ĐÚNG CHUẨN AUTHORIZATION HEADER ====
 export const updateProduct = async (id, access_token, data) => {
-    const res = await axiosJWT.put(`${process.env.REACT_APP_API_URL}/product/update/${id}`, data, {
-        headers: {
-            token: `Bearer ${access_token}`,
-        },
-    });
+    const res = await axiosJWT.put(
+        `${process.env.REACT_APP_API_URL}/product/update/${id}`,
+        data,
+        authHeader(access_token)
+    );
     return res.data;
 };
 
 export const deleteProduct = async (id, access_token) => {
-    const res = await axiosJWT.delete(`${process.env.REACT_APP_API_URL}/product/delete/${id}`, {
-        headers: {
-            token: `Bearer ${access_token}`,
-        },
-    });
+    const res = await axiosJWT.delete(
+        `${process.env.REACT_APP_API_URL}/product/delete/${id}`,
+        authHeader(access_token)
+    );
     return res.data;
 };
 
 export const deleteManyProduct = async (data, access_token) => {
-    const res = await axiosJWT.post(`${process.env.REACT_APP_API_URL}/product/delete-many-product`, data, {
-        headers: {
-            token: `Bearer ${access_token}`,
-        },
-    });
+    const res = await axiosJWT.post(
+        `${process.env.REACT_APP_API_URL}/product/delete-many-product`,
+        data,
+        authHeader(access_token)
+    );
     return res.data;
 };
 

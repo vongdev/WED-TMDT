@@ -1,3 +1,4 @@
+/* TableComponent.module.scss - Đã tối ưu, sạch code, không xung đột file khác */
 .table-actions {
     display: flex;
     justify-content: space-between;
@@ -13,34 +14,30 @@
     gap: 6px;
     padding: 8px 16px;
     font-size: 1.4rem;
-    color: white;
+    color: #fff;
     background: linear-gradient(90deg, #ff4d4d, #ff7070);
     font-weight: 600;
     cursor: pointer;
     border-radius: 6px;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
     border: none;
     box-shadow: 0 2px 8px rgba(255, 77, 77, 0.25);
-    
+
     &:hover {
         background: linear-gradient(90deg, #ff3333, #ff5e5e);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(255, 77, 77, 0.35);
     }
-    
     &:active {
         transform: translateY(0);
     }
-    
     svg {
         font-size: 1.6rem;
     }
-    
     &.disabled {
         opacity: 0.6;
         cursor: not-allowed;
         background: #cccccc;
-        
         &:hover {
             transform: none;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -61,46 +58,40 @@
     font-weight: 600;
     font-size: 1.3rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    
+    transition: all 0.3s;
+
     svg {
         font-size: 1.6rem;
     }
-    
     p {
         margin: 0;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
     }
-    
     &:hover {
         background-color: rgba(21, 109, 51, 0.12);
         transform: translateY(-2px);
-        
         p {
             text-decoration: underline;
         }
     }
-    
     &:active {
         transform: translateY(0);
     }
 }
 
-/* Thêm style cho thanh tìm kiếm trong bảng */
+/* Style cho thanh tìm kiếm trong bảng */
 .search-container {
     display: flex;
     align-items: center;
     margin-bottom: 16px;
 }
-
 .search-input {
     padding: 10px 16px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     font-size: 1.3rem;
     width: 300px;
-    transition: all 0.3s ease;
-    
+    transition: all 0.3s;
     &:focus {
         border-color: #3a7bd5;
         box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
@@ -113,18 +104,15 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 16px;
-    
+
     :global(.ant-pagination-item-active) {
         border-color: #3a7bd5;
-        
         a {
             color: #3a7bd5;
         }
     }
-    
     :global(.ant-pagination-item:hover) {
         border-color: #00d2ff;
-        
         a {
             color: #00d2ff;
         }
@@ -136,17 +124,15 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    
+
     :global(.ant-table-thead > tr > th) {
         background: linear-gradient(90deg, rgba(58, 123, 213, 0.1), rgba(0, 210, 255, 0.1));
         color: #333;
         font-weight: 600;
     }
-    
     :global(.ant-table-tbody > tr:hover > td) {
         background-color: rgba(58, 123, 213, 0.05);
     }
-    
     :global(.ant-table-row-selected > td) {
         background-color: rgba(58, 123, 213, 0.08) !important;
     }
@@ -156,13 +142,11 @@
 .empty-data {
     padding: 40px 0;
     text-align: center;
-    
     img {
         width: 120px;
         margin-bottom: 16px;
         opacity: 0.7;
     }
-    
     p {
         font-size: 1.4rem;
         color: #888;

@@ -1,16 +1,19 @@
 import { Badge, Col, Popover, Row } from 'antd';
 import className from 'classnames/bind';
 import styles from './HeaderComponent.module.scss';
-import { UserOutlined, ShoppingCartOutlined } from '@ant-design/icons'; // Đã xóa CaretDownOutlined
+import { UserOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as UserService from '../../services/UserService';
 import { resetUser } from '../../redux/slices/userSlice';
 import { useEffect, useState } from 'react';
-import Loading from '../LoadingComponent/Loading';
+import Loading from '../LoadingComponent/Loading.jsx';
 import { searchProduct } from '../../redux/slices/productSlice';
 import * as message from '../../components/Message/Message';
+
+// Thêm NotificationBell
+import NotificationBell from '../NotificationBell/NotificationBell';
 
 const cx = className.bind(styles);
 
@@ -21,7 +24,7 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
 
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
-    const [searchValue, setSearchValue] = useState(''); // Đổi tên biến để tránh cảnh báo
+    const [searchValue, setSearchValue] = useState('');
     const [isOpenPopup, setIsOpenPopup] = useState(false);
 
     const handleNavigateLogin = () => {
@@ -44,10 +47,8 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
         } else if (type === 'admin') {
             navigate('/system/admin');
         } else if (type === 'orders') {
-            // Chỉ cần navigate, không cần truyền token qua state
             navigate('/user-orders');
         }
-
         setIsOpenPopup(false);
     };
 
@@ -77,7 +78,7 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
 
     const onChangeSearchInput = (e) => {
         const value = e.target.value;
-        setSearchValue(value); // Sử dụng biến đã đổi tên
+        setSearchValue(value);
         dispatch(searchProduct(value));
     };
 
@@ -94,11 +95,13 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
                             placeholder="Tìm kiếm sản phẩm..."
                             textButton="Tìm kiếm"
                             onChange={onChangeSearchInput}
-                            value={searchValue} // Thêm giá trị để tận dụng biến
+                            value={searchValue}
                         />
                     </Col>
                 )}
                 <Col span={6} className={cx('header-right')}>
+                    {/* Thêm NotificationBell - realtime notification */}
+                    <NotificationBell isAdmin={user?.isAdmin} />
                     <Loading isLoading={loading}>
                         <div className={cx('account-wrapper')}>
                             {user?.avatar ? (
@@ -119,7 +122,6 @@ const HeaderComponent = ({ isHiddenCart = false, isHiddenSearch = false }) => {
                             )}
                         </div>
                     </Loading>
-
                     {!isHiddenCart && (
                         <div className={cx('cart-wrapper')} onClick={() => navigate('/order')}>
                             <Badge count={order?.orderItems.length} size="small">

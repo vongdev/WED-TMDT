@@ -1,31 +1,103 @@
+:root {
+    --primary-color: #3a7bd5;
+    --primary-gradient: linear-gradient(90deg, #3a7bd5, #00d2ff);
+    --primary-gradient-hover: linear-gradient(90deg, #2990e2, #01b8d7);
+    --danger-color: #ff424e;
+    --avatar-border: #e0e0e0;
+    --shadow: 0 2px 10px rgba(58,123,213,0.15);
+    --transition: all 0.2s;
+    --border-radius: 8px;
+}
+
 .title {
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 2.2rem;
+    color: #2d3a4b;
+    margin-bottom: 18px;
+    text-shadow: 0 2px 6px rgba(40,80,120,0.08);
+    letter-spacing: 0.5px;
 }
 
 .add-button {
-    width: 150px;
-    height: 50px;
+    width: 170px;
+    height: 48px;
     margin: 12px 0 30px;
+    background: var(--primary-gradient);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: var(--border-radius);
+    border: none;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    &:hover, &:focus {
+        background: var(--primary-gradient-hover);
+        box-shadow: 0 4px 18px rgba(58,123,213,0.22);
+        opacity: 0.97;
+        outline: none;
+    }
 }
 
 .submit-btn {
     margin-left: 36px;
     margin-top: 10px;
-
+    background: var(--primary-gradient);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    &:hover, &:focus {
+        background: var(--primary-gradient-hover);
+        box-shadow: 0 4px 18px rgba(58,123,213,0.22);
+        opacity: 0.97;
+        outline: none;
+    }
 }
 
 .avatar {
-    height: 50px;
-    width: 50px;
+    height: 48px;
+    width: 48px;
     border-radius: 50%;
     object-fit: cover;
-    margin-left: 30px;
+    margin-left: 24px;
+    border: 2px solid var(--avatar-border);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    &:hover, &:focus {
+        box-shadow: 0 0 0 3px #3a7bd533;
+        border-color: var(--primary-color);
+        outline: none;
+    }
 }
 
 .table-action {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
     font-size: 1.6rem;
+    .anticon {
+        color: var(--primary-color);
+        transition: color 0.22s, transform 0.18s;
+        cursor: pointer;
 
+        &:hover {
+            color: var(--danger-color);
+            transform: scale(1.15);
+        }
+    }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+    .title { font-size: 1.4rem; }
+    .add-button { width: 120px; height: 36px; font-size: 1rem; }
+    .avatar { height: 36px; width: 36px; margin-left: 12px; }
+}
+
+@media (max-width: 600px) {
+    .title { font-size: 1.1rem; }
+    .add-button { width: 90px; height: 28px; font-size: 0.92rem; }
+    .avatar { height: 28px; width: 28px; margin-left: 6px; }
 }

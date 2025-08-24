@@ -1,3 +1,13 @@
+:root {
+    --primary-color: #3a7bd5;
+    --primary-gradient: linear-gradient(90deg, #3a7bd5, #00d2ff);
+    --primary-gradient-hover: linear-gradient(90deg, #2990e2, #01b8d7);
+    --danger-color: #ff424e;
+    --header-radius: 12px;
+    --shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    --transition: all 0.2s;
+}
+
 .wrapper {
     width: 100%;
     display: flex;
@@ -6,8 +16,8 @@
     padding: 12px 120px;
     gap: 20px;
     flex-wrap: nowrap;
-    background: linear-gradient(90deg, #3a7bd5, #00d2ff);
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    background: var(--primary-gradient);
+    box-shadow: var(--shadow);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -22,7 +32,6 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     letter-spacing: -0.5px;
     transition: transform 0.3s ease;
-    
     &:hover {
         transform: scale(1.05);
     }
@@ -48,12 +57,14 @@
     outline: none;
     width: 320px;
     font-size: 1rem;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    color: #222;
 }
 
 .search-input:focus {
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 0 0 2px var(--primary-color), 0 4px 12px rgba(0, 0, 0, 0.12);
     width: 350px;
 }
 
@@ -62,7 +73,7 @@
     right: 5px;
     top: 50%;
     transform: translateY(-50%);
-    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    background: var(--primary-gradient);
     color: white;
     border: none;
     border-radius: 50%;
@@ -72,10 +83,11 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
-    
+    transition: var(--transition);
+
     &:hover {
         transform: translateY(-50%) scale(1.1);
+        background: var(--primary-gradient-hover);
     }
 }
 
@@ -88,8 +100,8 @@
     cursor: pointer;
     padding: 8px 12px;
     border-radius: 8px;
-    transition: all 0.2s ease;
-    
+    transition: var(--transition);
+
     &:hover {
         background-color: rgba(255, 255, 255, 0.15);
     }
@@ -109,7 +121,6 @@
     span {
         cursor: pointer;
         transition: color 0.2s ease;
-        
         &:hover {
             color: #e0f7fa;
         }
@@ -132,7 +143,7 @@
 .user-menu {
     display: flex;
     flex-direction: column;
-    align-items: left;
+    align-items: flex-start;
     gap: 8px;
     padding: 10px 0;
     background-color: white;
@@ -145,10 +156,10 @@
     font-weight: 400;
     font-size: 1.2rem;
     padding: 10px 15px;
-    transition: all 0.2s ease;
-    
+    transition: var(--transition);
+
     &:hover {
-        color: #3098ec;
+        color: var(--primary-color);
         background-color: #f5f9ff;
     }
 }
@@ -160,8 +171,8 @@
     border: 2px solid #fff;
     object-fit: cover;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-    
+    transition: var(--transition);
+
     &:hover {
         transform: scale(1.1);
         border-color: #e0f7fa;
@@ -171,12 +182,11 @@
 // Badge cho giỏ hàng
 .cart-badge {
     position: relative;
-    
     .badge {
         position: absolute;
         top: -8px;
         right: -8px;
-        background-color: #ff424e;
+        background-color: var(--danger-color);
         color: white;
         border-radius: 50%;
         min-width: 20px;
@@ -195,7 +205,6 @@
     .wrapper {
         padding: 10px 40px;
     }
-    
     .search-input {
         width: 250px;
     }
@@ -205,7 +214,6 @@
     .wrapper {
         padding: 10px 20px;
     }
-    
     .search-input {
         width: 200px;
     }

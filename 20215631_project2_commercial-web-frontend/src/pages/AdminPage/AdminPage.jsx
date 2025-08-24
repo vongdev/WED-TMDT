@@ -1,12 +1,15 @@
 import { Menu } from 'antd';
 import { useState } from 'react';
-import { UserOutlined, AppstoreOutlined, AuditOutlined } from '@ant-design/icons';
+import { UserOutlined, AppstoreOutlined, AuditOutlined, BellOutlined } from '@ant-design/icons';
 import classNames from 'classnames/bind';
 import styles from './AdminPage.module.scss';
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import AdminUser from '../../components/AdminUser/AdminUser';
 import AdminProduct from '../../components/AdminProduct/AdminProduct';
 import AdminOrder from '../../components/AdminOrder/AdminOrder';
+
+// THÊM: NotificationBell cho thông báo realtime
+import NotificationBell from '../../components/NotificationBell/NotificationBell';
 
 const cx = classNames.bind(styles);
 
@@ -61,7 +64,13 @@ const AdminPage = () => {
                     items={items}
                     onClick={handleOnClick}
                 />
-                <div className={cx('main')}>{renderPage(keySelected)}</div>
+                <div className={cx('main')}>
+                    {/* GẮN THÔNG BÁO REALTIME Ở ĐÂY */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+                        <NotificationBell isAdmin />
+                    </div>
+                    {renderPage(keySelected)}
+                </div>
             </div>
         </div>
     );

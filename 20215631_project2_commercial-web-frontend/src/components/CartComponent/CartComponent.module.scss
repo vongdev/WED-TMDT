@@ -1,18 +1,30 @@
+:root {
+    --primary-color: #3a7bd5;
+    --primary-gradient: linear-gradient(90deg, #3a7bd5, #00d2ff);
+    --primary-gradient-hover: linear-gradient(90deg, #2990e2, #01b8d7);
+    --danger-color: #ff424e;
+    --success-color: #51c878;
+    --card-radius: 12px;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.12);
+    --transition: all 0.3s;
+}
+
 .card-wrapper {
     position: relative;
-    border-radius: 12px;
+    border-radius: var(--card-radius);
     background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
     overflow: hidden;
     height: 100%;
     display: flex;
     flex-direction: column;
     padding: 12px;
-    
+
     &:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        box-shadow: var(--shadow-hover);
     }
 }
 
@@ -20,7 +32,7 @@
     font-size: 1.4rem;
     font-weight: 600;
     white-space: nowrap;
-    overflow: hidden; 
+    overflow: hidden;
     text-overflow: ellipsis;
     max-width: 150px;
     margin: 10px 0;
@@ -45,7 +57,7 @@
     height: 200px;
     max-width: 200px;
     transition: transform 0.4s ease;
-    
+
     &:hover {
         transform: scale(1.05);
     }
@@ -88,7 +100,7 @@
 .price {
     font-weight: 700;
     font-size: 1.8rem;
-    color: #ff424e; // Màu đỏ của Tiki/Shopee
+    color: var(--danger-color); // Màu đỏ của Tiki/Shopee
     letter-spacing: -0.5px;
 }
 
@@ -113,7 +125,7 @@
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(2px);
-    border-radius: 12px;
+    border-radius: var(--card-radius);
     color: #fff;
     font-size: 2rem;
     font-weight: 600;
@@ -139,7 +151,7 @@
 
 // Nút thêm vào giỏ hàng
 .add-to-cart {
-    background: linear-gradient(90deg, #3a7bd5, #00d2ff);
+    background: var(--primary-gradient);
     color: white;
     border: none;
     border-radius: 25px;
@@ -147,14 +159,28 @@
     font-weight: 500;
     margin-top: auto;
     cursor: pointer;
-    transition: all 0.3s;
-    
-    &:hover {
+    transition: var(--transition);
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover, &:focus {
+        background: var(--primary-gradient-hover);
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        outline: none;
     }
-    
+
     &:active {
         transform: translateY(0);
     }
+}
+
+// Responsive
+@media (max-width: 600px) {
+    .card-name { font-size: 1.05rem; max-width: 100px; }
+    .price { font-size: 1.1rem; }
+    .card-image { height: 120px; max-width: 120px; }
+    .card-image-container { height: 120px; }
 }
